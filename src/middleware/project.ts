@@ -10,10 +10,9 @@ declare global {
 }
 
 export async function validateProjectExists(req: Request, res: Response, next: NextFunction) {
-	const { projectId } = req.params;
 	try {
+		const { projectId } = req.params;
 		const project = await Project.findById(projectId);
-
 		if (!project) {
 			res.status(404).json({ error: 'Proyecto no encontrado.' });
 			return;

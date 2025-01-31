@@ -11,7 +11,6 @@ export class TaskController {
 			req.project.tasks.push(task.id);
 
 			// Guardando cambios
-
 			await Promise.allSettled([task.save(), req.project.save()]);
 
 			res.send('Tarea creada exitosamente.');
@@ -35,21 +34,61 @@ export class TaskController {
 	};
 
 	static getTaskById = async (req: Request, res: Response): Promise<void> => {
-        const { taskId } = req.params;
 		try {
-			const task = await Task.findById(taskId);
-
-            if (!task) {
-                res.status(404).json({ error: "Tarea no encontrada." });
-                return;
-            }
-
-            if (task.project !== req.project.id) {
+            if (req.task.project.toString() !== req.project.id) {
                 res.status(400).json({ error: "Acción no válida." });
                 return;
             }
 
-			res.json(task);
+			res.json(req.task);
+		} catch (error) {
+			res.status(500).send({ error: 'Hubo un error' });
+		}
+	};
+
+	static updateTask = async (req: Request, res: Response): Promise<void> => {
+		try {
+            if (req.task.project.toString() !== req.project.id) {
+                res.status(400).json({ error: "Acción no válida." });
+                return;
+            }
+
+			req.task.name = req.body.name;
+			req.task.description = req.body.description;
+			await req.task.save();
+
+			res.json("Tarea actualizada correctamente");
+		} catch (error) {
+			res.status(500).send({ error: 'Hubo un error' });
+		}
+	};
+
+	static deleteTask = async (req: Request, res: Response): Promise<void> => {
+		try {
+            if (req.task.project.toString() !== req.project.id) {
+                res.status(400).json({ error: "Acción no válida." });
+                return;
+            }
+
+			req.project.tasks = req.project.tasks.filter(task => task.toString() !== req.task.id.toString());
+			
+			Promise.allSettled([
+				req.task.deleteOne(),
+				req.project.save()
+			]);
+
+			res.json("Tarea actualizada correctamente");
+		} catch (error) {
+			res.status(500).send({ error: 'Hubo un error' });
+		}
+	};
+
+	static updateTaskStatus = async (req: Request, res: Response): Promise<void> => {
+		try {
+			const { status } = req.body;
+			req.task.status = status;
+			await req.task.save();
+			res.json("Tarea actualizada correctamente");
 		} catch (error) {
 			res.status(500).send({ error: 'Hubo un error' });
 		}
