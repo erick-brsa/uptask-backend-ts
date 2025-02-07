@@ -23,3 +23,11 @@ export async function validateTaskExists(req: Request, res: Response, next: Next
 		res.status(500).json({ error: 'Hubo un error al momento de acceder ' });
 	}
 }
+
+export async function taskBeLongsToProject(req: Request, res: Response, next: NextFunction) {
+	if (req.task.project.toString() !== req.project.id.toString()) {
+		res.status(400).json({ error: "Acción no válida." });
+		return;
+	}
+	next();
+}
